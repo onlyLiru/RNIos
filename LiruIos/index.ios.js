@@ -20,7 +20,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import Fonts from 'react-native-vector-icons/FontAwesome';
 
-import { Creation } from './app/creation/index.js';
+const  Creation = require('./app/creation/index.js');
 import { Edit } from './app/edit/index.js';
 import { Account } from './app/account/index.js';
 
@@ -52,7 +52,19 @@ export default class LiruIos extends Component {
               } 
             }
           >
-            <Creation />
+            <Navigator
+              initialRoute={{ 
+                name: 'Creation', 
+                component: Creation 
+              }}
+              configureScene={(route) => {
+                return Navigator.SceneConfigs.FloatFromRight;
+              }}
+              renderScene={(route, navigator) => {
+                let Component = route.component;
+                return <Component {...route.params} navigator={ navigator } />
+              }}
+            />
           </Icon.TabBarItem>
           <Icon.TabBarItem
             iconName="ios-recording-outline"

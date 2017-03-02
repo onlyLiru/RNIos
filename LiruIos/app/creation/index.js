@@ -11,9 +11,72 @@ import {
 	ActivityIndicator,
 	RefreshControl,
 	TouchableHighlight,
+	TouchableOpacity,
+	AlertIOS,
 } from 'react-native';
 import Xhr from '../common/request.js';
+const VideoDetail = require('./videoDetail.js');
 var {height, width} = Dimensions.get('window');
+
+class RenderRow extends Component {
+	constructor(props){
+		super(props);
+		let row=this.props.row;
+		this.state={
+			row:row,
+			up:row.up
+		}
+	}
+	render() {
+		let rowData=this.state.row;
+
+		return (<TouchableHighlight onPress={ this.props.onSelect }><View style={styles.item}>
+			<Text style={styles.listTitle}>{rowData.title}</Text>
+			<Image 
+				source={{uri: rowData.thumb }}
+				style={styles.thumb}
+			>
+				<Icon style={styles.play} name="ios-play" size={35} color="#fff" />
+			</Image>
+			<View style={styles.itemFooter}>
+				<TouchableHighlight>
+					<View style={styles.handleBox}>
+						{
+							this.state.up ? <Icon onPress={this._up.bind(this)} name="ios-heart-outline" style={styles.up} />
+								: <Icon onPress={this._up.bind(this)} name="ios-heart" style={[styles.up,{color:'#f60'}]} />
+						}
+						<Text onPress={this._up.bind(this)} style={styles.handleText}>喜欢</Text>
+					</View>
+				</TouchableHighlight>
+				<View style={styles.handleBox}>
+					<Icon style={styles.comment} name="ios-chatboxes-outline" />
+					<Text style={styles.handleText}>评论</Text>
+				</View>
+			</View>
+		</View></TouchableHighlight>)
+	}
+	_up() {
+		Xhr.get({
+			url:'http://rap.taobao.org/mockjs/14526/api/up',
+			data:{
+				id:this.state.row.id,
+				accessToken:'abc',
+				up:this.state.row.up
+			}
+		})
+		.then((data)=>{
+			if(data.success){
+				console.log(data);
+				this.setState({
+					up:!this.state.up
+				});
+			}
+		})
+		.catch((error)=>{
+			console.log(error);
+		});
+	}
+}
 
 let LISTDATA=[];
 
@@ -28,31 +91,23 @@ class Creation extends Component {
 			isNoData:false,
 			isRefreshing:false,
 			page:1,
-			dataSource: ds.cloneWithRows(LISTDATA)
+			dataSource: ds.cloneWithRows(LISTDATA),
 	    };
+	}
+	_loadPage(row) {
+		this.props.navigator.push({
+			name:'videoDetail',
+			component:VideoDetail,
+			params:{
+				row:row
+			}
+		});
 	}
 
 	renderRow(rowData) {
-		return <TouchableHighlight><View style={styles.item}>
-			<Text style={styles.listTitle}>{rowData.title}</Text>
-			<Image 
-				source={{uri: rowData.thumb }}
-				style={styles.thumb}
-			>
-				<Icon style={styles.play} name="ios-play" size={35} color="#fff" />
-			</Image>
-			<View style={styles.itemFooter}>
-				<View style={styles.handleBox}>
-					<Icon name="ios-heart-outline" style={styles.up} />
-					<Text style={styles.handleText}>喜欢</Text>
-				</View>
-				<View style={styles.handleBox}>
-					<Icon style={styles.comment} name="ios-chatboxes-outline" />
-					<Text style={styles.handleText}>评论</Text>
-				</View>
-			</View>
-		</View></TouchableHighlight>
+		return <RenderRow key={rowData.id} onSelect={ ()=>{this._loadPage(rowData)} } row={rowData} />
 	}
+
 
 	render() {
 		return (<View style={styles.container}>
@@ -61,29 +116,12 @@ class Creation extends Component {
 			</View>
 			<ListView
 	          dataSource={this.state.dataSource}
-	          renderRow={this.renderRow}
+	          renderRow={this.renderRow.bind(this)}
 	          automaticallyAdjustContentInsets={false}
 	          onEndReached={ this._fetchMoreData.bind(this) }
 	          onEndReachedThreshold={ 20 }
-	          renderFooter={ 
-	          	()=> {
-	          		let footActivity=null;
-	          		if(this.state.isNoData){
-	          			footActivity=<View><Text style={{textAlign:'center',paddingBottom:20,paddingTop:40,color:'#999'}}>暂无数据</Text></View>;
-	          		}else{
-		          		if(this.state.isNoMoreData){
-		          			footActivity=<View><Text style={{textAlign:'center',paddingBottom:20,color:'#999'}}>没有更多了</Text></View>;
-		          		}else{
-			          		footActivity= <ActivityIndicator
-						        style={{height: 80}}
-						    />;
-		          		};
-	          		}
-	          		 
-		          	return footActivity
-		        } 
-		      }
-		      enableEmptySections={true}
+	          renderFooter={ this._setFooter.bind(this) }
+		      enableEmptySections={ true }
 		      refreshControl={
 		          <RefreshControl
 		            refreshing={this.state.isRefreshing}
@@ -106,7 +144,7 @@ class Creation extends Component {
 		Xhr.get({
 			url:'http://rap.taobao.org/mockjs/14526/api/creations',
 			params:{
-				accessToken:'111abc',
+				accessToken:'abc',
 				name:'liru'
 			}
 		})
@@ -123,6 +161,7 @@ class Creation extends Component {
 					});
 					return;
 				}
+				console.log(LISTDATA);
 				self.setState({
 					dataSource:self.state.dataSource.cloneWithRows(LISTDATA),
 					isLoading:false,
@@ -155,6 +194,22 @@ class Creation extends Component {
 			isRefreshing:true,
 		});
 		this._fetchData();
+	}
+	_setFooter(){
+  		let footActivity=null;
+  		if(this.state.isNoData){
+  			footActivity=<View><Text style={{textAlign:'center',paddingBottom:20,paddingTop:40,color:'#999'}}>暂无数据</Text></View>;
+  		}else{
+      		if(this.state.isNoMoreData){
+      			footActivity=<View><Text style={{textAlign:'center',paddingBottom:20,color:'#999'}}>没有更多了</Text></View>;
+      		}else{
+          		footActivity= <ActivityIndicator
+			        style={{height: 80}}
+			    />;
+      		};
+  		}
+  		 
+      	return footActivity
 	}
 	
 }
@@ -238,4 +293,6 @@ const styles={
 }
 
 
-module.exports = { Creation }
+module.exports = Creation
+
+
