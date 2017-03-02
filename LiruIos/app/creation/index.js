@@ -1,3 +1,5 @@
+'use strict'; 
+
 import React, { Component } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Fonts from 'react-native-vector-icons/FontAwesome';
