@@ -119,11 +119,12 @@ class Creation extends Component {
 			<ListView
 	          dataSource={this.state.dataSource}
 	          renderRow={this.renderRow.bind(this)}
-	          automaticallyAdjustContentInsets={false}
 	          onEndReached={ this._fetchMoreData.bind(this) }
 	          onEndReachedThreshold={ 20 }
 	          renderFooter={ this._setFooter.bind(this) }
+	          automaticallyAdjustContentInsets={false}
 		      enableEmptySections={ true }
+		      showsVerticalScrollIndicator={ false }
 		      refreshControl={
 		          <RefreshControl
 		            refreshing={this.state.isRefreshing}
