@@ -24,6 +24,7 @@ import Fonts from 'react-native-vector-icons/FontAwesome';
 const  Creation = require('./app/creation/index.js');
 import { Edit } from './app/edit/index.js';
 import { Account } from './app/account/index.js';
+import { Login } from './app/account/login.js';
 
 
 export default class LiruIos extends Component {
@@ -33,9 +34,13 @@ export default class LiruIos extends Component {
       const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
       this.state = {
         selectedTab:'list',
+        isLogin:false,
       };
     }
     render() {
+      if(!this.state.isLogin){
+        return <Login />
+      }
       return (
         <TabBarIOS 
           tintColor="#a52a2a"

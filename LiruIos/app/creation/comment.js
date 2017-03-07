@@ -103,6 +103,7 @@ class CommentList extends Component {
 		        	</View>
 		        	<TextInput
 		        		multiline={true}
+		        		autoFocus={true}
 		        		placeholder="说几句吧..."
 		        		defaultValue={this.state.textContent}
 		        		onChangeText={(text)=>{ 
