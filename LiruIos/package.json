@@ -10,12 +10,14 @@
     "mockjs": "^1.0.1-beta3",
     "query-string": "^4.3.2",
     "react": "~15.4.0",
+    "react-addons-update": "^15.4.2",
     "react-native": "0.41.2",
     "react-native-button": "^1.8.2",
-    "react-native-countdown": "0.0.3",
+    "react-native-image-picker": "^0.26.1",
     "react-native-storage": "^0.1.5",
     "react-native-vector-icons": "^4.0.0",
-    "react-native-video": "^1.0.0"
+    "react-native-video": "^1.0.0",
+    "react-timer-mixin": "^0.13.3"
   },
   "devDependencies": {
     "babel-jest": "19.0.0",

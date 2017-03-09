@@ -17,14 +17,44 @@ import {
   Image,
   ListView,
   Navigator,
+  AlertIOS,
+  AsyncStorage,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Fonts from 'react-native-vector-icons/FontAwesome';
+import Storage from 'react-native-storage';
 
 const  Creation = require('./app/creation/index.js');
 import { Edit } from './app/edit/index.js';
 import { Account } from './app/account/index.js';
 import { Login } from './app/account/login.js';
+
+
+var storage = new Storage({
+  // 最大容量，默认值1000条数据循环存储
+  size: 1000,
+
+  // 存储引擎：对于RN使用AsyncStorage，对于web使用window.localStorage
+  // 如果不指定则数据只会保存在内存中，重启后即丢失
+  storageBackend: AsyncStorage,
+
+  // 数据过期时间，默认一整天（1000 * 3600 * 24 毫秒），设为null则永不过期
+  defaultExpires: 1000 * 3600 * 24,
+
+  // 读写时在内存中缓存数据。默认启用。
+  enableCache: true,
+
+  // 如果storage中没有相应数据，或数据已过期，
+  // 则会调用相应的sync方法，无缝返回最新数据。
+  // sync方法的具体说明会在后文提到
+  // 你可以在构造函数这里就写好sync的方法
+  // 或是写到另一个文件里，这里require引入
+  // 或是在任何时候，直接对storage.sync进行赋值修改
+  sync: ()=>{
+    console.log('sync');
+  }
+});
+global.storage = storage;
 
 
 export default class LiruIos extends Component {
@@ -33,13 +63,13 @@ export default class LiruIos extends Component {
       const self=this;
       const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
       this.state = {
-        selectedTab:'list',
+        selectedTab:'account',
         isLogin:false,
       };
     }
     render() {
       if(!this.state.isLogin){
-        return <Login />
+        return <Login afterLogin={this._afterLogin.bind(this)} />
       }
       return (
         <TabBarIOS 
@@ -102,6 +132,37 @@ export default class LiruIos extends Component {
           </Icon.TabBarItem>
         </TabBarIOS>
       );
+    }
+    componentWillMount() {
+      this._getLoginMes();
+    }
+    _getLoginMes() {
+      const self=this;
+      storage.load({
+          key: 'user',
+          autoSync: true,
+          syncInBackground: true,
+      }).then(ret => {
+          // console.log(ret);
+          if(ret.accessToken){
+            self.setState({
+              isLogin:true
+            });
+          };
+      }).catch(err => {
+          console.log(err);
+      });
+    }
+    _afterLogin(data) {
+      // console.log(data);
+      storage.save({
+          key: 'user',
+          rawData: data,
+      });
+
+      this.setState({
+        isLogin:true,
+      });
     }
 
 }
